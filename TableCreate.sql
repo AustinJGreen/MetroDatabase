@@ -86,7 +86,7 @@ CREATE TABLE BUS_ROUTE_STOPS(
     ETA TIME,
     Stop_number INT,
 
-	PRIMARY KEY(To_name, From_name, Route_number, Stop_ID),
+	PRIMARY KEY(To_name, From_name, Route_number, Stop_ID, ETA, Stop_number),
 	CONSTRAINT BRS_FK_ROUTE FOREIGN KEY(To_name, From_name, Route_number) REFERENCES BUS_ROUTE(To_name, From_name, Route_number),
     CONSTRAINT BRS_FK_STOP FOREIGN KEY(Stop_ID) REFERENCES BUS_STOP(Stop_ID),
     
