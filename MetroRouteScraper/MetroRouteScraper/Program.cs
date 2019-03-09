@@ -344,7 +344,7 @@ namespace MetroRouteScraper
                                 route.ToName,
                                 route.RouteNumber,
                                 stop.StopID,
-                                new DateTime(routeStop.ETA.Ticks).ToString("h:mm tt"),
+                                new DateTime(routeStop.ETA.Ticks).ToString("hh:mm:sss"),
                                 routeStop.StopNumber
                                 );
                         }

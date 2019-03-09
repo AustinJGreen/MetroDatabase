@@ -1,6 +1,3 @@
-CREATE DATABASE metrodb;
-USE metrodb;
-
 CREATE TABLE EMPLOYEE(
     ID INT UNIQUE,
     Ssn VARCHAR(10) NOT NULL,
@@ -59,8 +56,8 @@ CREATE TABLE BUS(
 );
 
 CREATE TABLE BUS_ROUTE(
-    To_name VARCHAR(30) NOT NULL,
-    From_name VARCHAR(30) NOT NULL,
+    To_name VARCHAR(50) NOT NULL,
+    From_name VARCHAR(50) NOT NULL,
     Route_number VARCHAR(30) NOT NULL,
     Days_of_operation INT,
     
@@ -73,8 +70,8 @@ CREATE TABLE BUS_ROUTE(
 
 CREATE TABLE BUS_STOP(
     Stop_ID INT UNIQUE,
-    Stop_Name VARCHAR(30) NOT NULL,
-    Cross_Street VARCHAR(30) NOT NULL,
+    Stop_Name VARCHAR(50) NOT NULL,
+    Cross_Street VARCHAR(50) NOT NULL,
     PRIMARY KEY(Stop_ID),
     CONSTRAINT bstop_id_range CHECK(Stop_ID >= 0),
     CONSTRAINT bstop_name_range CHECK(LEN(Stop_Name) >= 3 AND LEN(Stop_Name) <= 30),
@@ -82,11 +79,11 @@ CREATE TABLE BUS_STOP(
 );
 
 CREATE TABLE BUS_ROUTE_STOPS(
-    To_name VARCHAR(30) NOT NULL,
-    From_name VARCHAR(30) NOT NULL,
+    To_name VARCHAR(50) NOT NULL,
+    From_name VARCHAR(50) NOT NULL,
     Route_number VARCHAR(30) NOT NULL,
     Stop_ID INT,
-    ETA DECIMAL,
+    ETA TIME,
     Stop_number INT,
 
 	PRIMARY KEY(To_name, From_name, Route_number, Stop_ID),
@@ -99,6 +96,20 @@ CREATE TABLE BUS_ROUTE_STOPS(
     CONSTRAINT brs_id_range CHECK(Stop_ID >= 0),
     CONSTRAINT brs_eta_range CHECK(ETA >= 0 AND ETA <= 360),
     CONSTRAINT brs_stop_num_range CHECK(Stop_number >= 1 AND Stop_number <= 50)
+);
+
+CREATE TABLE TRANSACT(
+    Transaction_ID INT,
+    Transaction_Type VARCHAR(30) NOT NULL,
+    Dollar_amount DECIMAL,
+    Bus_number INT,
+    PRIMARY KEY(Transaction_ID, Bus_number),
+    FOREIGN KEY(Bus_number) REFERENCES BUS(Bus_number),
+
+    CONSTRAINT id_range CHECK(Transaction_ID >= 0),
+    CONSTRAINT type_range CHECK(Transaction_Type IN('cash', 'card')),
+    CONSTRAINT money_range CHECK(Dollar_amount >= 0),
+    CONSTRAINT Bus_range CHECK(Bus_number > 0 AND Bus_number <= 999)
 );
 
 CREATE TABLE PARK_AND_RIDE(
@@ -114,20 +125,6 @@ CREATE TABLE PARK_AND_RIDE(
     CONSTRAINT park_add_range CHECK(LEN(Park_Address) >= 3 AND LEN(Park_Address) <= 30),
     CONSTRAINT park_name_range CHECK(LEN(Park_Name) >= 3 AND LEN(Park_Name) <= 30),
     CONSTRAINT park_spot_range CHECK(Park_Spots > 0 AND Park_Address < 100000)
-);
-
-CREATE TABLE TRANSACT(
-    Transaction_ID INT,
-    Transaction_Type VARCHAR(30) NOT NULL,
-    Dollar_amount DECIMAL,
-    Bus_number INT,
-    PRIMARY KEY(Transaction_ID, Bus_number),
-    FOREIGN KEY(Bus_number) REFERENCES BUS(Bus_number),
-
-    CONSTRAINT id_range CHECK(Transaction_ID >= 0),
-    CONSTRAINT type_range CHECK(Transaction_Type IN('cash', 'card')),
-    CONSTRAINT money_range CHECK(Dollar_amount >= 0),
-    CONSTRAINT Bus_range CHECK(Bus_number > 0 AND Bus_number <= 999)
 );
 
 CREATE TABLE TRANSIT_CARD(
