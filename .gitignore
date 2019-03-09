@@ -1,0 +1,8 @@
+MetroRouteScraper/.vs/
+MetroRouteScraper/MetroRouteScraper/bin/
+MetroRouteScraper/MetroRouteScraper/obj/
+MetroRouteScraper/MetroRouteScraper/properties/
+MetroRouteScraper/packages/
+*.sln
+*.csproj
+*.config
