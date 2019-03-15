@@ -74,5 +74,27 @@ FROM BASE
 WHERE Base_name = 'A'
 
 
+--Can't do the people/population based queries as information 
+--isn't stored on buses.
+--potentially can hack it together from transactions? 
+--Transact attaches transit card (people info) to bus
 
+--How many people boarding are disabled?
+--boarding specific bus?
+SELECT COUNT(TC.Has_disability)
+FROM TRANSIT_CARD AS TC, TRANSACT AS T , BUS AS B
+WHERE TC.Transaction_ID = T.Transaction_ID AND
+T.Bus_number = B.Bus_number AND
+T.Bus_number = 'A'
+
+
+
+--What is the most profitable route?
+--Measuring profitability based on number of transactions for a bus?
+--need to extend bus to a specific route_number
+SELECT COUNT(TC.Transaction_ID)
+FROM TRANSIT_CARD AS TC, TRANSACT AS T , BUS AS B
+WHERE TC.Transaction_ID = T.Transaction_ID AND
+T.Bus_number = B.Bus_number AND
+B.route_number = 'A'
 
