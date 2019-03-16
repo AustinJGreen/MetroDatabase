@@ -291,7 +291,7 @@ namespace MetroRouteScraper
         {
             for (int i = routes.Count - 1; i >= 0; i--)
             {
-                if (routes[i].Stops == null || routes[i].Stops.Length == 0)
+                if (routes[i].Stops == null || routes[i].Stops.Length == 0 || string.IsNullOrEmpty(routes[i].FromName) || string.IsNullOrEmpty(routes[i].ToName))
                 {
                     routes.RemoveAt(i);
                 }
@@ -514,6 +514,11 @@ namespace MetroRouteScraper
             string queries = GenerateParkAndRideInserts(parkAndRides);
             string curDir = Environment.CurrentDirectory;
             File.WriteAllText(Path.Combine(curDir, "parkandrides.sql"), queries);
+        }
+
+        internal static void GenerateBusInserts()
+        {
+
         }
 
         internal static void Main(string[] args)
