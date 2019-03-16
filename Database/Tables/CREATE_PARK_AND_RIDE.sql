@@ -1,7 +1,7 @@
 CREATE TABLE PARK_AND_RIDE(
 	Park_City VARCHAR(30) NOT NULL,
     Park_Address VARCHAR(50) NOT NULL,
-    Park_Name VARCHAR(50) NOT NULL,
+    Park_NBUSame VARCHAR(50) NOT NULL,
     Park_Spots INT,
     Stop_ID INT,
     

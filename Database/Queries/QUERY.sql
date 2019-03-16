@@ -39,8 +39,8 @@ The City and its Employees may need this information to control bus distribution
 SELECT BS.Stop_Name
 FROM BUS_ROUTE AS BR, BUS_STOP AS BS, BUS_ROUTE_STOPS AS BRS
 WHERE BRS.Stop_ID = BS.Stop_ID AND
-BRS.Route_number = BR.Route_number AND
-BR.Route_number = 'A'
+    BRS.Route_number = BR.Route_number AND
+    BR.Route_number = 'A'
 GROUP BY BRS.Stop_name;
 
 --How do I get from point A to point B (to/from names)
@@ -48,16 +48,16 @@ GROUP BY BRS.Stop_name;
 SELECT BR.Route_number
 FROM BUS_ROUTE AS BR
 WHERE BR.To_name = 'A' AND
-BR.From_name = 'B';
+    BR.From_name = 'B';
 
 
 --How do I get from point A to point B (to/from stops)
 SELECT BS.Route_number
 FROM BUS_ROUTE AS BR, BUS_STOP AS BS, BUS_ROUTE_STOPS AS BRS
 WHERE BRS.Stop_ID = BS.Stop_ID AND
-BRS.Route_number = BR.Route_number AND
-BS.Stop_Name = 'A' OR
-BS.Stop_Name = 'B';
+    BRS.Route_number = BR.Route_number AND
+    BS.Stop_Name = 'A' OR
+    BS.Stop_Name = 'B';
 
 --When will my bus arrive?
 --get ETA of current bus_route_stops
@@ -65,8 +65,8 @@ BS.Stop_Name = 'B';
 SELECT BRS.ETA
 FROM BUS_ROUTE AS BR, BUS_STOP AS BS, BUS_ROUTE_STOPS AS BRS
 WHERE BRS.Stop_ID = BS.Stop_ID AND
-BRS.Route_number = BR.Route_number AND
-BRS.Route_number = 'MyRoute';
+    BRS.Route_number = BR.Route_number AND
+    BRS.Route_number = 'MyRoute';
 
 --How many buses can park at base A?
 SELECT Parking_spots
@@ -84,8 +84,8 @@ WHERE Base_name = 'A'
 SELECT COUNT(TC.Has_disability)
 FROM TRANSIT_CARD AS TC, TRANSACT AS T , BUS AS B
 WHERE TC.Transaction_ID = T.Transaction_ID AND
-T.Bus_number = B.Bus_number AND
-T.Bus_number = 'A'
+    T.Bus_number = B.Bus_number AND
+    T.Bus_number = 'A'
 
 
 
@@ -95,6 +95,13 @@ T.Bus_number = 'A'
 SELECT COUNT(TC.Transaction_ID)
 FROM TRANSIT_CARD AS TC, TRANSACT AS T , BUS AS B
 WHERE TC.Transaction_ID = T.Transaction_ID AND
-T.Bus_number = B.Bus_number AND
-B.route_number = 'A'
+    T.Bus_number = B.Bus_number AND
+    B.route_number = 'A'
 
+
+--What are all of the stops I can get to on routes heading from Duvall earlier than 8am?
+SELECT b.Cross_street
+FROM BUS_ROUTE AS a JOIN BUS_STOP AS b JOIN BUS_ROUTE_STOPS AS c ON a.Route_number=c.Route_number AND b.Stop_ID = c.Stop_ID 
+WHERE a.From_name='Duvall' AND ETA < '08:00:00'
+Group By b.Cross_street
+ORDER BY c.Stop_number ASC;
