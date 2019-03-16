@@ -3,7 +3,7 @@ Database mocking real metropolitan bus database. Holds tables with information r
 
 ## Relational Model
 <p align="center">
-  <img src="https://github.com/ajosg/KerasEE/blob/master/Design/rm.png?raw=true" alt="Whoops, plot is missing."/>
+  <img src="https://github.com/ajosg/MetroDatabase/blob/master/Design/rm.png?raw=true" alt="Whoops, plot is missing."/>
 </p>
 
 ## Connection String  
