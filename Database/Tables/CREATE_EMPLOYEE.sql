@@ -1,0 +1,10 @@
+CREATE TABLE EMPLOYEE(
+    ID INT UNIQUE,
+    Ssn VARCHAR(10) NOT NULL,
+    E_Name VARCHAR (30) NOT NULL,
+
+    PRIMARY KEY(ID),
+    CONSTRAINT ID_range CHECK(ID >= 0),
+    CONSTRAINT Ssn_range CHECK(LEN(Ssn) = 10),
+    CONSTRAINT Name_range CHECK(LEN(E_Name) <= 3 AND LEN(E_Name) <= 30)
+);
