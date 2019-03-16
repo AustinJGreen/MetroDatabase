@@ -249,6 +249,44 @@ namespace MetroRouteScraper
             return routes;
         }
 
+        internal static List<ParkAndRide> ScrapeParkAndRides()
+        {
+            List<ParkAndRide> parkAndRides = new List<ParkAndRide>();
+
+            HtmlWeb webLoader = new HtmlWeb();
+            HtmlDocument doc = webLoader.Load("https://www.wsdot.wa.gov/Choices/parkride.htm");
+
+            var prNode = doc.DocumentNode.SelectSingleNode("//*[@id=\"block-system-main\"]/div/div/div/table[25]/tbody");
+            string city = null;
+            foreach(HtmlNode node in prNode.ChildNodes.Skip(1))
+            {
+                int startIndex = 0;
+                if (string.Compare(node.ChildNodes[0].GetAttributeValue("align", null), "left") == 0)
+                {
+                    city = node.ChildNodes[0].InnerText;
+                    startIndex += 2;
+                }
+
+                if (node.ChildNodes.Count >= 4)
+                {
+                    string name = node.ChildNodes[startIndex].InnerText;
+                    string address = node.ChildNodes[startIndex + 2].InnerText;
+                    string parkingSpacesStr = node.ChildNodes[startIndex + 4].InnerText;
+                    int parkingSpaces = -1;
+                    if (!int.TryParse(parkingSpacesStr, out parkingSpaces))
+                    {
+                        continue;
+                    }
+
+                    ParkAndRide parkAndRide = new ParkAndRide(city, address, name, parkingSpaces);
+                    parkAndRides.Add(parkAndRide);
+                }
+
+            }
+
+            return parkAndRides;
+        }
+
         internal static void RemoveInvalidRoutes(List<BusRoute> routes)
         {
             for (int i = routes.Count - 1; i >= 0; i--)
@@ -260,7 +298,7 @@ namespace MetroRouteScraper
             }
         }
 
-        internal static string GenerateQueries(List<BusRoute> routes)
+        internal static string GenerateRouteInserts(List<BusRoute> routes)
         {
             //Get list of stops 
             List<BusStop> stops = new List<BusStop>();
@@ -360,19 +398,127 @@ namespace MetroRouteScraper
             return bldr.ToString();
         }
 
-        internal static void Main(string[] args)
+        internal static string GenerateParkAndRideInserts(List<ParkAndRide> parkandrides)
+        {
+            StringBuilder bldr = new StringBuilder();
+            bldr.AppendLine("-- Insert park and rides");
+            for (int i = 0; i < parkandrides.Count; i++)
+            {
+                bldr.AppendFormat("INSERT INTO PARK_AND_RIDE Values (\"{0}\", \"{1}\", \"{2}\", {3}, {4});\r\n",
+                    parkandrides[i].City,
+                    parkandrides[i].Address,
+                    parkandrides[i].Name,
+                    parkandrides[i].ParkingSpots,
+                    parkandrides[i].StopID
+                    );
+            }
+
+            return bldr.ToString();
+        }
+
+        internal static void GenerateRouteInserts()
         {
             List<BusRoute> routes = ScrapeRoutes();
             RemoveInvalidRoutes(routes);
             routes = routes.Distinct().ToList();
 
-            int maxFrom = routes.Max(t => t.FromName.Length);
-            int maxTo = routes.Max(t => t.ToName.Length);
+            //int maxFrom = routes.Max(t => t.FromName.Length);
+            //int maxTo = routes.Max(t => t.ToName.Length);
 
-            string queries = GenerateQueries(routes);
-
+            string queries = GenerateRouteInserts(routes);
             string curDir = Environment.CurrentDirectory;
-            File.WriteAllText(Path.Combine(curDir, "queries.sql"), queries);
+            File.WriteAllText(Path.Combine(curDir, "routes.sql"), queries);
+        }
+
+        internal static BusStop ClosestStop(ParkAndRide pr, List<BusStop> stops)
+        {
+            BusStop[] sarr = new BusStop[stops.Count];
+            int[] distances = new int[stops.Count];
+            for (int i = 0; i < stops.Count; i++)
+            {
+                string[] streets = stops[i].CrossStreet.Split('&');
+
+                int best = Levenshtein.Compute(pr.Address, stops[i].CrossStreet);
+                if (streets.Length == 2)
+                {
+                    int dis1 = Levenshtein.Compute(pr.Address, streets[0]);
+                    int dis2 = Levenshtein.Compute(pr.Address, streets[1]);
+                    int avg = (dis1 + dis2) / 2;
+                    best = Math.Min(avg, best);
+                }
+
+                distances[i] = best;
+                sarr[i] = stops[i];
+            }
+
+            Array.Sort(distances, sarr);
+            return sarr[0];
+        }
+
+        internal static void GenerateParkAndRideInserts()
+        {
+            //Get park and rides
+            Console.Write("Scraping park and rides...");
+            List<ParkAndRide> parkAndRides = ScrapeParkAndRides();
+            Console.WriteLine("Done.");
+
+            //Get routes so we can match to closest stop
+            List<BusRoute> routes = ScrapeRoutes();
+            RemoveInvalidRoutes(routes);
+            routes = routes.Distinct().ToList();
+
+            //Get list of stops 
+            List<BusStop> stops = new List<BusStop>();
+            List<int> availableIds = Enumerable.Range(10000, 89999).ToList();
+            for (int i = 0; i < routes.Count; i++)
+            {
+                for (int j = 0; j < routes[i].Stops.Length; j++)
+                {
+                    if (routes[i].Stops[j] != null)
+                    {
+                        BusStop curStop = routes[i].Stops[j].Stop;
+                        if (curStop != null && !stops.Contains(curStop))
+                        {
+                            stops.Add(curStop);
+                            if (curStop.StopID != -1)
+                            {
+                                availableIds.Remove(curStop.StopID);
+                            }
+                        }
+                    }
+                }
+            }
+
+            //Give stops without an ID an ID.
+            Random rng = new Random();
+            for (int j = 0; j < stops.Count; j++)
+            {
+                if (stops[j].StopID == -1)
+                {
+                    int index = rng.Next(availableIds.Count);
+                    int uniqueId = availableIds[index];
+                    availableIds.RemoveAt(index);
+                    stops[j].StopID = uniqueId;
+                }
+            }
+
+            //Match to closest stop
+            Console.WriteLine("Matching Stops...");
+            foreach (var p in parkAndRides)
+            {
+                Console.WriteLine("Searching for stop at {0}", p.Name);
+                BusStop closest = ClosestStop(p, stops);
+                p.StopID = closest.StopID;
+            }
+
+            string queries = GenerateParkAndRideInserts(parkAndRides);
+            string curDir = Environment.CurrentDirectory;
+            File.WriteAllText(Path.Combine(curDir, "parkandrides.sql"), queries);
+        }
+
+        internal static void Main(string[] args)
+        { 
+            GenerateParkAndRideInserts();
         }
     }
 }

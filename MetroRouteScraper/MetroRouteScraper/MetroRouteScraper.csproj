@@ -45,6 +45,8 @@
     <Compile Include="BusRoute.cs" />
     <Compile Include="BusRouteStop.cs" />
     <Compile Include="BusStop.cs" />
+    <Compile Include="Levenshtein.cs" />
+    <Compile Include="ParkAndRide.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
