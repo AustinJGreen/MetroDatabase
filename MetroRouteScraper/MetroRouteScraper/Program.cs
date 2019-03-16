@@ -370,7 +370,9 @@ namespace MetroRouteScraper
             int maxTo = routes.Max(t => t.ToName.Length);
 
             string queries = GenerateQueries(routes);
-            File.WriteAllText(@"C:\Users\austi\Desktop\queries.sql", queries);
+
+            string curDir = Environment.CurrentDirectory;
+            File.WriteAllText(Path.Combine(curDir, "queries.sql"), queries);
         }
     }
 }
