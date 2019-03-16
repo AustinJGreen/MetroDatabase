@@ -1,0 +1,10 @@
+INSERT INTO TRANSACT Values (1,"card",10.20, 1);
+INSERT INTO TRANSACT Values (1,"card",10.20, 2);
+INSERT INTO TRANSACT Values (2,"card",10.20, 3);
+INSERT INTO TRANSACT Values (2,"cash",10.20, 4);
+INSERT INTO TRANSACT Values (3,"cash",10.20, 5);
+INSERT INTO TRANSACT Values (3,"cash",10.20, 6);
+INSERT INTO TRANSACT Values (4,"cash",1, 7);
+INSERT INTO TRANSACT Values (5,"card",10.20, 8);
+INSERT INTO TRANSACT Values (6,"card",10.20, 9);
+INSERT INTO TRANSACT Values (7,"card",10.20, 999);
