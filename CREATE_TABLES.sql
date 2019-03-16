@@ -33,8 +33,8 @@ CREATE TABLE BASE(
 CREATE TABLE BUS(
     Bus_number INT,
     Driver_ID INT,
-    To_name VARCHAR(30) NULL,
-    From_name VARCHAR(30) NULL,
+    To_name VARCHAR(60) NULL,
+    From_name VARCHAR(60) NULL,
     Route_number VARCHAR(30) NULL,
     Bus_model VARCHAR(30) NULL,
     Seats_available INT,
@@ -56,8 +56,8 @@ CREATE TABLE BUS(
 );
 
 CREATE TABLE BUS_ROUTE(
-    To_name VARCHAR(50) NOT NULL,
-    From_name VARCHAR(50) NOT NULL,
+    To_name VARCHAR(60) NOT NULL,
+    From_name VARCHAR(60) NOT NULL,
     Route_number VARCHAR(30) NOT NULL,
     Days_of_operation INT,
     
@@ -70,8 +70,8 @@ CREATE TABLE BUS_ROUTE(
 
 CREATE TABLE BUS_STOP(
     Stop_ID INT UNIQUE,
-    Stop_Name VARCHAR(50) NOT NULL,
-    Cross_Street VARCHAR(50) NOT NULL,
+    Stop_Name VARCHAR(60) NOT NULL,
+    Cross_Street VARCHAR(60) NOT NULL,
     PRIMARY KEY(Stop_ID),
     CONSTRAINT bstop_id_range CHECK(Stop_ID >= 0),
     CONSTRAINT bstop_name_range CHECK(LEN(Stop_Name) >= 3 AND LEN(Stop_Name) <= 30),
@@ -79,8 +79,8 @@ CREATE TABLE BUS_STOP(
 );
 
 CREATE TABLE BUS_ROUTE_STOPS(
-    To_name VARCHAR(50) NOT NULL,
-    From_name VARCHAR(50) NOT NULL,
+    To_name VARCHAR(60) NOT NULL,
+    From_name VARCHAR(60) NOT NULL,
     Route_number VARCHAR(30) NOT NULL,
     Stop_ID INT,
     ETA TIME,
@@ -94,7 +94,6 @@ CREATE TABLE BUS_ROUTE_STOPS(
     CONSTRAINT brs_From_range CHECK(LEN(From_name) >= 3 AND LEN(From_name) <=30),
     CONSTRAINT brs_Route_range CHECK(LEN(Route_number) >= 3 AND LEN(Route_number) <= 30),
     CONSTRAINT brs_id_range CHECK(Stop_ID >= 0),
-    CONSTRAINT brs_eta_range CHECK(ETA >= 0 AND ETA <= 360),
     CONSTRAINT brs_stop_num_range CHECK(Stop_number >= 1 AND Stop_number <= 50)
 );
 
