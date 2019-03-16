@@ -152,7 +152,6 @@ namespace MetroRouteScraper
             string aDestShort = HttpUtility.HtmlDecode(StripHTML(GetParameter(routeNode.OuterHtml, "var aDestShort=\'", "\'")))?.Replace("To ", "").Trim();
             string bDestShort = HttpUtility.HtmlDecode(StripHTML(GetParameter(routeNode.OuterHtml, "var bDestShort=\'", "\'")))?.Replace("To ", "").Trim();
 
-
             HtmlNode daysNode = routeNode.SelectSingleNode("//*[@id=\"schedule_wrapper\"]/ul[1]");
             if (daysNode == null)
             {
@@ -323,6 +322,7 @@ namespace MetroRouteScraper
 
             bldr.AppendLine();
             bldr.AppendLine("-- Insert route stops");
+            HashSet<string> routesInserted = new HashSet<string>();
             for (int i = 0; i < routes.Count; i++)
             {
                 for (int j = 0; j < routes[i].Stops.Length; j++)
@@ -339,7 +339,7 @@ namespace MetroRouteScraper
 
                         if (stop != null)
                         {
-                            bldr.AppendFormat("INSERT INTO BUS_ROUTE_STOPS Values (\"{0}\", \"{1}\", \"{2}\", {3}, \"{4}\", {5});\r\n",
+                            string routeStr = string.Format("INSERT INTO BUS_ROUTE_STOPS Values (\"{0}\", \"{1}\", \"{2}\", {3}, \"{4}\", {5});",
                                 route.FromName,
                                 route.ToName,
                                 route.RouteNumber,
@@ -347,6 +347,11 @@ namespace MetroRouteScraper
                                 new DateTime(routeStop.ETA.Ticks).ToString("hh:mm:sss"),
                                 routeStop.StopNumber
                                 );
+                            if (!routesInserted.Contains(routeStr))
+                            {
+                                routesInserted.Add(routeStr);
+                                bldr.AppendLine(routeStr);
+                            }
                         }
                     }
                 }
@@ -359,6 +364,10 @@ namespace MetroRouteScraper
         {
             List<BusRoute> routes = ScrapeRoutes();
             RemoveInvalidRoutes(routes);
+            routes = routes.Distinct().ToList();
+
+            int maxFrom = routes.Max(t => t.FromName.Length);
+            int maxTo = routes.Max(t => t.ToName.Length);
 
             string queries = GenerateQueries(routes);
             File.WriteAllText(@"C:\Users\austi\Desktop\queries.sql", queries);
