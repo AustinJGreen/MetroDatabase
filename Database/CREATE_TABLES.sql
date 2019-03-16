@@ -21,8 +21,8 @@ CREATE TABLE DRIVER(
 );
 
 CREATE TABLE BASE(
-    Base_address VARCHAR(30) NOT NULL,
-    Base_name VARCHAR(30) NOT NULL,
+    Base_address VARCHAR(50) NOT NULL,
+    Base_name VARCHAR(20) NOT NULL,
     Parking_spots INT,
     PRIMARY KEY(Base_address, Base_name),
     CONSTRAINT base_address_range CHECK(LEN(Base_address) >= 3 AND LEN(Base_address) <= 30),
