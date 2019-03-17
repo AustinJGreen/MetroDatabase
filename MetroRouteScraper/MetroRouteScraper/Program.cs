@@ -516,14 +516,41 @@ namespace MetroRouteScraper
             File.WriteAllText(Path.Combine(curDir, "parkandrides.sql"), queries);
         }
 
+        internal static void GenerateEmployeeInserts()
+        {
+            int employees = 2716;
+            Random rng = new Random();
+            RandomName rngName = new RandomName(rng);
+            StringBuilder bldr = new StringBuilder();
+
+            List<int> idsAvailable = Enumerable.Range(1, 9989).ToList();
+            for (int i = 0; i < employees; i++)
+            {
+                int idIndex = rng.Next(idsAvailable.Count);
+                int id = idsAvailable[idIndex];
+                idsAvailable.RemoveAt(idIndex);
+                int ssn1 = rng.Next(100, 1000);
+                int ssn2 = rng.Next(10, 100);
+                int ssn3 = rng.Next(1000, 10000);
+                string name = rngName.Generate(rng.Next(2) == 0 ? Sex.Female : Sex.Male);
+                bldr.AppendFormat("INSERT INTO EMPLOYEE VALUES ({0}, \"{1}-{2}-{3}\", \"{4}\");\r\n", id, ssn1, ssn2, ssn3, name);
+            }
+
+            string queries = bldr.ToString();
+            string curDir = Environment.CurrentDirectory;
+            File.WriteAllText(Path.Combine(curDir, "employees.sql"), queries);
+        }
+
         internal static void GenerateBusInserts()
         {
+            int busCount = 1540;
+            List<int> availableNumbers = Enumerable.Range(1, 9998).ToList();
 
         }
 
         internal static void Main(string[] args)
-        { 
-            GenerateParkAndRideInserts();
+        {
+            GenerateEmployeeInserts();
         }
     }
 }
