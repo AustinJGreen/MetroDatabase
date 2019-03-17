@@ -15,6 +15,42 @@ namespace MetroRouteScraper
 {
     internal class Program
     {
+        internal static string[] models =
+        {
+            "Gillig Phantom",
+            "New Flyer D40LF",
+            "New Flyer DE60LF",
+            "New Flyer DE60LF",
+            "New Flyer DE60LFA",
+            "Orion VII",
+            "New Flyer DE60LFR",
+            "New Flyer Xcelsior XDE35",
+            "New Flyer Xcelsior XDE40",
+            "New Flyer Xcelsior XT40",
+            "New Flyer Xcelsior XDE60",
+            "New Flyer Xcelsior XT60",
+            "Proterra Catalyst",
+            "Gillig Low Floor"
+        };
+
+        internal static int[] seats =
+        {
+            25,
+            30,
+            40,
+            40,
+            45,
+            40,
+            50,
+            40,
+            40,
+            60,
+            60,
+            60,
+            60,
+            60
+        };
+
         internal static string GetParameter(string src, string start, string end)
         {
             int startIndex = src.IndexOf(start);
@@ -506,7 +542,7 @@ namespace MetroRouteScraper
                 }
                 else
                 {
-                    Console.WriteLine("Unable to retrieve employee data. Cannot generate driver data.");
+                    Console.WriteLine("Unable to retrieve bus stop data. Cannot generate p&r data.");
                     return;
                 }
             }
@@ -548,9 +584,7 @@ namespace MetroRouteScraper
             string queries = bldr.ToString();
             string curDir = Environment.CurrentDirectory;
             File.WriteAllText(Path.Combine(curDir, "employees.sql"), queries);
-        }
-
-        
+        }     
 
         internal static void GenerateDriverInserts()
         {
@@ -597,16 +631,95 @@ namespace MetroRouteScraper
 
         internal static void GenerateBusInserts()
         {
+            Random rng = new Random();
+
             int busCount = 1540;
             List<int> availableNumbers = Enumerable.Range(1, 9998).ToList();
 
-            
+            List<BusRoute> routes = new List<BusRoute>();
+            List<string> driverIds = null;
+            List<string> baseAddresses = null;
+            using (MetroDB db = new MetroDB("guest", "guest"))
+            {
+                if (db.Connect())
+                {
+                    var routeData = db.GetTable("BUS_ROUTE");
+                    for (int i = 0; i < routeData[0].Count; i++)
+                    {
+                        BusRoute br = new BusRoute();
+                        br.ToName = routeData[0][i];
+                        br.FromName = routeData[1][i];
+                        br.RouteNumber = int.Parse(routeData[2][i]);
+                        br.RouteName = routeData[2][i];
+                        br.DaysOfOperation = byte.Parse(routeData[3][i]);
+                        routes.Add(br);
+                    }
+
+                    var driverDat = db.GetTable("DRIVER");
+                    driverIds = driverDat[0];
+
+                    var basesDat = db.GetTable("BASE");
+                    baseAddresses = basesDat[0];
+                }
+                else
+                {
+                    Console.WriteLine("Unable to retrieve data. Cannot generate bus data.");
+                    return;
+                }
+            }
+
+            StringBuilder bldr = new StringBuilder();
+            List<BusRoute> distro = new List<BusRoute>(routes);
+            for (int i = 0; i < busCount; i++)
+            {
+                int bIndex = rng.Next(availableNumbers.Count);
+                int bNum = availableNumbers[bIndex];
+                availableNumbers.RemoveAt(bIndex);
+
+                int dIndex = rng.Next(driverIds.Count);
+                string dId = driverIds[dIndex];
+                driverIds.RemoveAt(dIndex);
+                
+                int rIndex = rng.Next(distro.Count);
+                BusRoute route = distro[rIndex];
+                distro.RemoveAt(rIndex);
+                if (distro.Count == 0)
+                {
+                    distro.AddRange(routes);
+                }
+
+                int mIndex = rng.Next(models.Length);
+                string model = models[rng.Next(mIndex)];
+                int seatCnt = seats[mIndex];
+
+                double rngNorm = rng.NextNormal(0, 1);
+                int milesDriven = (int)((3 + rngNorm) * ((models.Length - mIndex) * 25000));
+
+                int baIndex = rng.Next(baseAddresses.Count);
+                string bAddr = baseAddresses[baIndex];
+
+
+                bldr.AppendFormat("INSERT INTO BUS Values ({0}, {1}, \"{2}\", \"{3}\", {4}, \"{5}\", {6}, {7}, \"{8}\");\r\n",
+                    bNum,
+                    dId,
+                    route.ToName,
+                    route.FromName,
+                    route.RouteNumber,
+                    model,
+                    seatCnt,
+                    milesDriven,
+                    bAddr);
+            }
+
+            string queries = bldr.ToString();
+            string curDir = Environment.CurrentDirectory;
+            File.WriteAllText(Path.Combine(curDir, "buses.sql"), queries);
         }
 
         internal static void Main(string[] args)
         {
             //GenerateDriverInserts();
-            GenerateParkAndRideInserts();
+            GenerateBusInserts();
         }
     }
 }

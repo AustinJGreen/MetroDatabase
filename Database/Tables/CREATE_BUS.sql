@@ -7,7 +7,7 @@ CREATE TABLE BUS(
     Bus_model VARCHAR(30) NULL,
     Seats_available INT,
     Miles INT,
-    Base_address VARCHAR(30),
+    Base_address VARCHAR(50),
 
     PRIMARY KEY(Bus_number, Driver_ID, Base_address),
     CONSTRAINT FK_Bus_Driver_ID FOREIGN KEY(Driver_ID) REFERENCES DRIVER(Driver_ID),
