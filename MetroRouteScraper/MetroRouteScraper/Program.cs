@@ -62,11 +62,20 @@ namespace MetroRouteScraper
             string[] lines = csv.Split(new char[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             string[] stopNames = lines[0].Split(',');
 
+            bool multipleRoutes = false;
+
             BusStop[] stops = new BusStop[stopNames.Length];
             for (int i = 0; i < stopNames.Length; i++)
             {
+                if (string.Compare(stopNames[i], "route", true) == 0)
+                {
+                    multipleRoutes = true;
+                    continue;
+                }
+
                 //Parse individual stop
-                string[] stopArgs = stopNames[i].Split('-');
+                //int lastDash = stopNames[i].LastIndexOf('-')
+                string[] stopArgs = stopNames[i].Split(new string[] { " - " }, StringSplitOptions.RemoveEmptyEntries);
                 if (stopArgs.Length < 2)
                 {
                     continue;
@@ -91,8 +100,19 @@ namespace MetroRouteScraper
             {
                 //string routeTimes
                 string[] times = lines[i].Split(',');
+                if (multipleRoutes)
+                {
+                    string routeNameStr = times[0];
+                    if (string.Compare(routeNameStr, route.RouteName) != 0)
+                    {
+                        continue;
+                    }
+                }
+
                 for (int t = 0; t < times.Length; t++)
                 {
+                    
+
                     string time = times[t].Length > 8 ? times[t].Substring(0, times[t].LastIndexOf(' ')) : times[t];
                     time = time.Replace("\'B\'", "").Replace("\'AB\'", "").Replace("\'H\'", "").Trim('\'').Trim(' ');
                     if (time.Contains("---") || time.Length > 8 || time.Length < 4)
@@ -598,7 +618,8 @@ namespace MetroRouteScraper
 
         internal static void Main(string[] args)
         {
-            GenerateDriverInserts();
+            //GenerateDriverInserts();
+            GenerateRouteInserts();
         }
     }
 }
