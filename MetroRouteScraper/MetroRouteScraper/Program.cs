@@ -454,26 +454,31 @@ namespace MetroRouteScraper
 
         internal static BusStop ClosestStop(ParkAndRide pr, List<BusStop> stops)
         {
+            List<string> common = new List<string>();
+            common.Add("north");
+            common.Add("south");
+            common.Add("west");
+            common.Add("east");
+            common.Add("valley");
+
             BusStop[] sarr = new BusStop[stops.Count];
-            int[] distances = new int[stops.Count];
+            double[] distances = new double[stops.Count];
             for (int i = 0; i < stops.Count; i++)
             {
                 string[] streets = stops[i].CrossStreet.Split('&');
 
-                int best = Levenshtein.Compute(pr.Address, stops[i].CrossStreet);
-                if (streets.Length == 2)
-                {
-                    int dis1 = Levenshtein.Compute(pr.Address, streets[0]);
-                    int dis2 = Levenshtein.Compute(pr.Address, streets[1]);
-                    int avg = (dis1 + dis2) / 2;
-                    best = Math.Min(avg, best);
-                }
-
-                distances[i] = best;
+                double score = 0.5 * Levenshtein.Compute(pr.Address, stops[i].CrossStreet) +
+                            0.25 * Levenshtein.Compute(pr.Name, stops[i].Name) +
+                            Levenshtein.Compute(pr.City, stops[i].Name) +
+                            Levenshtein.Compute(pr.Address, stops[i].Name);
+                distances[i] = score;
                 sarr[i] = stops[i];
             }
 
+
+
             Array.Sort(distances, sarr);
+
             return sarr[0];
         }
 
@@ -482,45 +487,27 @@ namespace MetroRouteScraper
             //Get park and rides
             Console.Write("Scraping park and rides...");
             List<ParkAndRide> parkAndRides = ScrapeParkAndRides();
+
+            int max = parkAndRides.Max(t => t.Address.Length);
+
             Console.WriteLine("Done.");
 
             //Get routes so we can match to closest stop
-            List<BusRoute> routes = ScrapeRoutes();
-            RemoveInvalidRoutes(routes);
-            routes = routes.Distinct().ToList();
-
-            //Get list of stops 
             List<BusStop> stops = new List<BusStop>();
-            List<int> availableIds = Enumerable.Range(10000, 89999).ToList();
-            for (int i = 0; i < routes.Count; i++)
+            using (MetroDB db = new MetroDB("guest", "guest"))
             {
-                for (int j = 0; j < routes[i].Stops.Length; j++)
+                if (db.Connect())
                 {
-                    if (routes[i].Stops[j] != null)
+                    var tableData = db.GetTable("BUS_STOP");
+                    for (int i = 0; i < tableData[0].Count; i++)
                     {
-                        BusStop curStop = routes[i].Stops[j].Stop;
-                        if (curStop != null && !stops.Contains(curStop))
-                        {
-                            stops.Add(curStop);
-                            if (curStop.StopID != -1)
-                            {
-                                availableIds.Remove(curStop.StopID);
-                            }
-                        }
+                        stops.Add(new BusStop(tableData[1][i], tableData[2][i], int.Parse(tableData[0][i])));
                     }
                 }
-            }
-
-            //Give stops without an ID an ID.
-            Random rng = new Random();
-            for (int j = 0; j < stops.Count; j++)
-            {
-                if (stops[j].StopID == -1)
+                else
                 {
-                    int index = rng.Next(availableIds.Count);
-                    int uniqueId = availableIds[index];
-                    availableIds.RemoveAt(index);
-                    stops[j].StopID = uniqueId;
+                    Console.WriteLine("Unable to retrieve employee data. Cannot generate driver data.");
+                    return;
                 }
             }
 
@@ -619,7 +606,7 @@ namespace MetroRouteScraper
         internal static void Main(string[] args)
         {
             //GenerateDriverInserts();
-            GenerateRouteInserts();
+            GenerateParkAndRideInserts();
         }
     }
 }
