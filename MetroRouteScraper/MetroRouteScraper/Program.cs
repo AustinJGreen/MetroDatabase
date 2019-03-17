@@ -1,6 +1,8 @@
 ﻿using HtmlAgilityPack;
+using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -541,16 +543,62 @@ namespace MetroRouteScraper
             File.WriteAllText(Path.Combine(curDir, "employees.sql"), queries);
         }
 
+        
+
+        internal static void GenerateDriverInserts()
+        {
+            Random rng = new Random();
+            int drivers = rng.Next(2000, 2100);
+
+            List<string> employeeIds = null;
+            using (MetroDB db = new MetroDB("guest", "guest"))
+            {
+                if (db.Connect())
+                {
+                    var employeeData = db.GetTable("EMPLOYEE");
+                    employeeIds = employeeData[0];
+                }
+                else
+                {
+                    Console.WriteLine("Unable to retrieve employee data. Cannot generate driver data.");
+                    return;
+                }
+            }
+
+            List<int> driverIds = Enumerable.Range(1, 9998).ToList();
+
+            StringBuilder bldr = new StringBuilder();
+            for (int i = 0; i < drivers; i++)
+            {
+                int eIndex = rng.Next(employeeIds.Count);
+                string eId = employeeIds[eIndex];
+                employeeIds.RemoveAt(eIndex);
+
+                int dIndex = rng.Next(driverIds.Count);
+                int dId = driverIds[dIndex];
+                driverIds.RemoveAt(dIndex);
+
+                double rngNorm = rng.NextNormal(0, 1);
+                int milesDriven = (int)((3 + rngNorm) * 250000);
+                bldr.AppendFormat("INSERT INTO DRIVER Values ({0}, {1}, {2});\r\n", eId, dId, milesDriven);
+            }
+
+            string queries = bldr.ToString();
+            string curDir = Environment.CurrentDirectory;
+            File.WriteAllText(Path.Combine(curDir, "drivers.sql"), queries);
+        }
+
         internal static void GenerateBusInserts()
         {
             int busCount = 1540;
             List<int> availableNumbers = Enumerable.Range(1, 9998).ToList();
 
+            
         }
 
         internal static void Main(string[] args)
         {
-            GenerateEmployeeInserts();
+            GenerateDriverInserts();
         }
     }
 }
