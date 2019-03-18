@@ -1,0 +1,25 @@
+<title>Reusable Form Demo</title>
+       	<link rel="stylesheet" media="screen" href="static/css/bootstrap.min.css">
+       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<div class="container">
+<h2>Where does my route stop?</h2>
+<form action="" method="post" role="form">
+<div class="form-group">
+	<label>Select route:</label>
+	<select name="Route_number">
+		{% for o in routeList %}
+		<option value="{{ o }}">{{ o }}</option>
+		{% endfor %}
+	</select>
+</div>
+<button type="submit" class="btn btn-success">Submit</button>
+</form>
+{% if ds %}
+<table style="width:100%">
+{% for s in stops %}
+	<tr>
+		<th>{{s}}</th>
+	</tr>
+{% endfor %}
+</table>
+{% endif %}

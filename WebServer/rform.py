@@ -1,10 +1,12 @@
-from wtforms import Form, TextField, TextAreaField, validators, StringField, SubmitField
+from wtforms import Form, TextField, TextAreaField, validators, StringField, SubmitField, SelectField
 
-class ReusableForm(Form):
-    name = TextField('Name:', validators=[validators.required()])
-    email = TextField('Email:', validators=[validators.required(), validators.Length(min=6, max=35)])
-    password = TextField('Password:', validators=[validators.required(), validators.Length(min=3, max=35)])
- 
-    def reset(self):
-        blankData = MultiDict([ ('csrf', self.reset_csrf() ) ])
-        self.process(blankData)
+class Query1Form(Form):
+    routeNumber = TextField('RouteNumber:', validators=[validators.required()])
+
+class Query2Form(Form):
+    stopA = SelectField('Stop A', choices=80, validators=[validators.required()])
+    stopB = TextField('Stop B', choices=80, validators=[validators.required()])
+
+class Query3Form(Form):
+    routeNumber = TextField('RouteNumber:', validators=[validators.required()])
+
