@@ -1,2 +1,2 @@
-pip3 install flask
-pip3 install --only-binary :all: mysqlclient
+pip install flask
+sudo apt-get install python-mysqldb
