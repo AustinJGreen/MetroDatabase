@@ -57,8 +57,8 @@ def query2():
 def handle_query2():
     stopA = request.form['stop_a']
     stopB = request.form['stop_b']
-    baseTable = db.execute_command("SELECT BR.Route_number FROM BUS_ROUTE_STOPS BRS INNER JOIN BUS_ROUTE BR ON BRS.Route_number = BR.Route_number INNER JOIN BUS_STOP BS ON BS.Stop_ID = BRS.Stop_ID WHERE BS.Stop_Name = \'" + str(stopA) + "\' OR BS.Stop_Name = \'" + str(stopB) + "\' GROUP BY BR.Route_number;")
-
+    baseTable = db.execute_command("SELECT BR.Route_number FROM BUS_ROUTE BR WHERE \'" + str(stopA) + "\' IN (SELECT Stop_Name FROM BUS_STOP A JOIN BUS_ROUTE_STOPS B ON A.Stop_ID=B.Stop_ID WHERE B.Route_number=BR.Route_number) AND \'" + str(stopB) + "\' IN (SELECT Stop_Name FROM BUS_STOP A JOIN BUS_ROUTE_STOPS B ON A.Stop_ID=B.Stop_ID WHERE B.Route_number=BR.Route_number) GROUP BY BR.Route_number")
+    
     routes = baseTable.fetch_row(maxrows=0)
     arr = []
     for route in routes:
