@@ -71,5 +71,5 @@ if __name__ == '__main__':
     sess.init_app(app)
 
     app.debug = True
-    app.run(ssl_context=context)
+    app.run(ssl_context=None)
 

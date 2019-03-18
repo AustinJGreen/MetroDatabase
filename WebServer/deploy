@@ -1,1 +1,1 @@
-sudo gunicorn -w 2 -b 0.0.0.0:80 server:app
+sudo gunicorn --daemon -w 2 -b 0.0.0.0:80 server:app
