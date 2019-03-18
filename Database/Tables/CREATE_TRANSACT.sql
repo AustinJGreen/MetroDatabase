@@ -1,7 +1,7 @@
 CREATE TABLE TRANSACT(
     Transaction_ID INT,
     Transaction_Type VARCHAR(30) NOT NULL,
-    Dollar_amount DECIMAL,
+    Dollar_amount DECIMAL(5, 2),
     Bus_number INT,
     PRIMARY KEY(Transaction_ID, Bus_number),
     FOREIGN KEY(Bus_number) REFERENCES BUS(Bus_number),

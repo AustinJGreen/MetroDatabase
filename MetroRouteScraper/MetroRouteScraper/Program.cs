@@ -716,10 +716,101 @@ namespace MetroRouteScraper
             File.WriteAllText(Path.Combine(curDir, "buses.sql"), queries);
         }
 
+        internal static void GenerateTransactions()
+        {
+            Random rng = new Random();
+            List<string> busNums = null;
+            using (MetroDB db = new MetroDB("guest", "guest"))
+            {
+                if (db.Connect())
+                {
+                    var tableData = db.GetTable("BUS");
+                    busNums = tableData[0];
+                }
+                else
+                {
+                    Console.WriteLine("Unable to retrieve bus stop data. Cannot generate transit card data.");
+                    return;
+                }
+            }
+
+            List<int> tids = Enumerable.Range(10000, 89999).ToList();
+            StringBuilder bldr = new StringBuilder();
+            for (int i = 0; i < 40000; i++)
+            {
+                int tIndex = rng.Next(tids.Count);
+                int tId = tids[tIndex];
+
+                int bIndex = rng.Next(busNums.Count);
+                string bNum = busNums[bIndex];
+
+                string type = rng.Next(2) == 0 ? "cash" : "card";
+                double dollarAmount = 2.75;
+                if (rng.NextDouble() < 0.25 && type.Equals("cash")) //25% of the time dont pay exact
+                {
+                    switch (rng.Next(10))
+                    {
+                        case 0:
+                        case 1:
+                        case 2:
+                        case 3:
+                        case 4:
+                        case 5:
+                            dollarAmount = 5;
+                            break;
+                        case 6:
+                        case 7:
+                        case 8:
+                            dollarAmount = 10;
+                            break;
+                        case 9:
+                            dollarAmount = 20;
+                            break;
+                    }
+                }
+                else
+                {
+                    switch (rng.Next(5))
+                    {
+                        case 0:
+                            dollarAmount = 1;
+                            break;
+                        case 1:
+                            dollarAmount = 1.50;
+                            break;
+                        case 2:
+                        case 3:
+                        case 4:
+                            dollarAmount = 2.75;
+                            break;
+                    }
+                }
+
+                bldr.AppendFormat("INSERT INTO TRANSACT Values ({0}, \"{1}\", {2}, {3});\r\n", tId, type, dollarAmount, bNum);
+            }
+
+            string queries = bldr.ToString();
+            string curDir = Environment.CurrentDirectory;
+            File.WriteAllText(Path.Combine(curDir, "transactions.sql"), queries);
+        }
+
+        internal static void GenerateTransitCard()
+        {
+            StringBuilder bldr = new StringBuilder();
+            for (int i = 0; i < 5000; i++)
+            {
+
+            }
+
+            string queries = bldr.ToString();
+            string curDir = Environment.CurrentDirectory;
+            File.WriteAllText(Path.Combine(curDir, "parkandrides.sql"), queries);
+        }
+
         internal static void Main(string[] args)
         {
             //GenerateDriverInserts();
-            GenerateBusInserts();
+            GenerateTransactions();
         }
     }
 }
