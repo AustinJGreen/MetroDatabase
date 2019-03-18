@@ -35,10 +35,14 @@ div {
 {% if ds %}
 <table style="width:100%">
 	<tr>
-		<th><h3>Route Number</h3><th>
+		<th><h3>From Name</h3></th>
+		<th><h3>To Name</h3></th>
+		<th><h3>Route Number</h3></th>
 {% for s in routes %}
 	<tr>
-		<th><p>{{s}}</p></th>
+		<th><p>{{s.f}}</p></th>
+		<th><p>{{s.t}}</p></th>
+		<th><p>{{s.n}}</p></th>
 	</tr>
 {% endfor %}
 </table>

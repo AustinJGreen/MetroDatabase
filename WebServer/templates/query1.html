@@ -27,13 +27,15 @@ div {
 <button type="submit" class="btn btn-success">Submit</button>
 </form>
 {% if ds %}
-<table style="width:100%">
+<table style="width:100%;">
 	<tr>
 		<th><h3>Stop Name</h3></th>
+		<th><h3>Stop Address</h3></th>
 	</tr>
 	{% for s in stops %}
 	<tr>
-		<th><p>{{s}}</p></th>
+		<th><p>{{s.name}}</p></th>
+		<th><p>{{s.addr}}</p></th>
 	</tr>
 	{% endfor %}
 	</tr>
