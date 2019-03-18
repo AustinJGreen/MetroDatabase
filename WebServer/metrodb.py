@@ -1,4 +1,4 @@
-import MySQLdb
+import pymysql.cursors
 
 class MetroDB:
 
@@ -9,7 +9,7 @@ class MetroDB:
         self.password = password
 
     def connect(self):
-        self.conn = MySQLdb.connect(host=self.host,
+        self.conn = pymysql.connect(host=self.host,
                                     user=self.user,
                                     passwd=self.password,
                                     port=self.port,
@@ -28,6 +28,6 @@ class MetroDB:
     def execute_command(self, command):
         if not self.connected():
             return False
-
-        self.conn.query(command)
-        return self.conn.store_result()
+        with self.conn.cursor() as cur:
+            cur.execute(command)
+            return cur.fetchall()
