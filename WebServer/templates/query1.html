@@ -1,8 +1,20 @@
-<title>Reusable Form Demo</title>
-       	<link rel="stylesheet" media="screen" href="static/css/bootstrap.min.css">
+<!DOCTYPE html>
+<html>
+<title>Query1</title>
+       <link rel="stylesheet" media="screen" href="static/css/bootstrap.min.css">
        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+body {
+	background-color: #f5f5f0
+}
+div {
+	background-color: #f5f5f0
+}
+</style>
+<body>
 <div class="container">
-<h2>Where does my route stop?</h2>
+<h4><a href="/">&#x3C;- Back to homepage</a></h4>
+<h1>Where does my route stop?</h1>
 <form action="" method="post" role="form">
 <div class="form-group">
 	<label>Select route:</label>
@@ -16,10 +28,17 @@
 </form>
 {% if ds %}
 <table style="width:100%">
-{% for s in stops %}
 	<tr>
-		<th>{{s}}</th>
+		<th><h3>Stop Name</h3></th>
 	</tr>
-{% endfor %}
+	{% for s in stops %}
+	<tr>
+		<th><p>{{s}}</p></th>
+	</tr>
+	{% endfor %}
+	</tr>
 </table>
 {% endif %}
+</div>
+</body>
+</html>

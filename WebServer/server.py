@@ -1,8 +1,6 @@
 from flask import Flask, flash, request, render_template
-import MySQLdb
 from metrodb import MetroDB
 from dbconnect import connection
-from rform import Query1Form, Query2Form, Query3Form
 import os
 
 db = MetroDB('guest', 'guest')
@@ -14,13 +12,18 @@ app.secret_key = '*J/2SvTcP$*tccx'
 app.config['SESSION_TYPE'] = 'filesystem'
 
 def get_routes():
-     # get all routes so we can store in variable and send to query1 form
     routeResult = db.execute_command("SELECT BR.Route_number FROM BUS_ROUTE BR GROUP BY BR.Route_number ORDER BY BR.Route_number")
     routeList = []
     for route in routeResult.fetch_row(maxrows=0):
         routeList.append(int(route[0].strip()))
     return routeList
 
+def get_stop_names():
+    stopResult = db.execute_command("SELECT Stop_Name FROM BUS_STOP ORDER BY Stop_Name Asc")
+    stopList = []
+    for stop in stopResult.fetch_row(maxrows=0):
+        stopList.append(stop[0])
+    return stopList
 
 @app.route('/')
 def homepage():
@@ -45,35 +48,28 @@ def handle_query1():
     routeList=get_routes()
     return render_template('query1.html', routeList=routeList,ds=True,stops=arr)
 
-@app.route('/query2')
-def handleQuery2():
-    form = Query2Form(request.form)
-    return render_template('query2.html',form=form)
+@app.route('/query2', methods=['GET'])
+def query2():
+    stopList = get_stop_names()
+    return render_template('query2.html',stopList=stopList,ds=False)
 
-@app.route('/query3')
-def handleQuery3():
-    form = Query3Form(request.form)
-    return render_template('query3.html',form=form)
+@app.route('/query2', methods=['POST'])
+def handle_query2():
+    stopA = request.form['stop_a']
+    stopB = request.form['stop_b']
+    baseTable = db.execute_command("SELECT BR.Route_number FROM BUS_ROUTE_STOPS BRS INNER JOIN BUS_ROUTE BR ON BRS.Route_number = BR.Route_number INNER JOIN BUS_STOP BS ON BS.Stop_ID = BRS.Stop_ID WHERE BS.Stop_Name = \'" + str(stopA) + "\' OR BS.Stop_Name = \'" + str(stopB) + "\' GROUP BY BR.Route_number;")
+
+    routes = baseTable.fetch_row(maxrows=0)
+    arr = []
+    for route in routes:
+        arr.append(route[0])
+
+    stopList = get_stop_names()
+    return render_template('query2.html',stopList=stopList,ds=True,routes=arr)
 
 if __name__ == '__main__':
     sess.init_app(app)
 
     app.debug = True
     app.run()
-#
 
-
-#def connection():
-#    conn = MySQLdb.connect(host='metrodb.c6yfhb0actbf.us-west-2.rds.amazonaws.com',
-#                           user = 'guest',
-#                           passwd = 'guest',
-#                           db = 'metrodb')
-#    c = conn.cursor()
-#
-#    return c, conn
-
-
-#GET, PUT, POST, DELETE, etc
-
-#if request.method == 'POST':
-#name=request.form['name']
