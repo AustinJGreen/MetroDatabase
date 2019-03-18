@@ -20,13 +20,14 @@ class MetroDB:
         return self.conn is not None
 
     def close(self):
-        if not connected():
+        if not self.connected():
             return False
         self.conn.close()
         return True
 
     def execute_command(self, command):
-        if not connected():
+        if not self.connected():
             return False
 
-        pass
+        self.conn.query(command)
+        return self.conn.store_result()
