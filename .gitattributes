@@ -1,4 +1,4 @@
 *.sql linguist-detectable=true
 *.sql linguist-language=sql
 Database/Inserts/* linguist-vendored
-Database/static/css/* linguist-vendored
+WebServer/static/css/* linguist-vendored
